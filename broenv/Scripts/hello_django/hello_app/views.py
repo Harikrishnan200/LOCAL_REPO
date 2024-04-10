@@ -37,7 +37,13 @@ def movie_list(request):
         'summary':'',
         'year':'2003',
         'sucess':True
-        }
+        },
+        {
+        'title':'aadu2',
+        'summary':'something',
+        'year':'2003',
+        'sucess':True
+        } 
 
 
 
