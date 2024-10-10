@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tailwind Login Page with Glassmorphism and Animation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+
+        .shake {
+            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* Glassmorphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.15); /* Lighter semi-transparent white */
+            backdrop-filter: blur(20px); /* Stronger blur effect */
+            -webkit-backdrop-filter: blur(20px); /* For Safari */
+            border: 1px solid rgba(255, 255, 255, 0.4); /* Lighter border for glass effect */
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); /* Deeper shadow for depth */
+            border-radius: 20px; /* Softer edges */
+        }
+
+        /* Background Animation */
+        body {
+            background: linear-gradient(45deg, #2c3e50, #3498db, #8e44ad, #c0392b, #f39c12);
+            background-size: 400% 400%;
+            animation: gradientBackground 15s ease infinite;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        @keyframes gradientBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Hover and focus effects */
+        .glass {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .glass:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        input, button {
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        button:hover {
+            background-color: #4e9bdc;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="glass p-10 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-3xl font-bold mb-6 text-center text-white">Login</h1>
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label for="email" class="block text-sm font-medium text-white">Email Address</label>
+                <input type="email" id="email" name="email" required class="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 placeholder-gray-500" placeholder="you@example.com">
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-medium text-white">Password</label>
+                <input type="password" id="password" name="password" required class="mt-2 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 placeholder-gray-500" placeholder="••••••••">
+            </div>
+            <div class="text-sm text-right">
+                <a href="#" class="font-medium text-blue-200 hover:text-blue-100">Forgot Password?</a>
+            </div>
+            <div>
+                <button type="submit" class="w-full py-3 px-4 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Login
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                this.classList.add('shake');
+                setTimeout(() => this.classList.remove('shake'), 820);
+                return;
+            }
+
+            console.log('Login attempt:', { email, password });
+            alert('Login attempt successful! Check the console for details.');
+        });
+    </script>
+</body>
+</html>

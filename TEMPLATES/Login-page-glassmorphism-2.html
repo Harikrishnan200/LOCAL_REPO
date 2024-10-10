@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tailwind Login Page with Animated Circles</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+        .shake {
+            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* Glassmorphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
+            backdrop-filter: blur(10px); /* Blur effect */
+            -webkit-backdrop-filter: blur(10px); /* For Safari */
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Light border for glass effect */
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Soft shadow */
+            border-radius: 12px;
+            position: relative;
+            z-index: 2; /* Bring above the animated circles */
+        }
+
+        /* Background and animated circles */
+        body {
+            background-color: #ffffff; /* Plain white background */
+        }
+
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: moveCircle 15s infinite ease-in-out;
+        }
+
+        .circle-1 {
+            width: 300px;
+            height: 300px;
+            background-color: rgba(0, 123, 255, 0.3);
+            top: -150px;
+            left: -150px;
+            animation-delay: 0s;
+        }
+
+        .circle-2 {
+            width: 400px;
+            height: 400px;
+            background-color: rgba(255, 193, 7, 0.3);
+            bottom: -200px;
+            right: -150px;
+            animation-delay: 5s;
+        }
+
+        .circle-3 {
+            width: 200px;
+            height: 200px;
+            background-color: rgba(40, 167, 69, 0.3);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: 2.5s;
+        }
+
+        @keyframes moveCircle {
+            0% {
+                transform: scale(1) translateY(0);
+            }
+            50% {
+                transform: scale(1.2) translateY(-20px);
+            }
+            100% {
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Hover effect */
+        .glass:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <!-- Animated Circles -->
+    <div class="circle circle-1"></div>
+    <div class="circle circle-2"></div>
+    <div class="circle circle-3"></div>
+
+    <!-- Glassmorphic Login Box -->
+    <div class="glass p-8 rounded-lg shadow-2xl w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-6 text-center text-white">Login Page</h1>
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label for="email" class="block text-sm font-medium text-white">Email address</label>
+                <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="john.doe@company.com">
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-medium text-white">Password</label>
+                <input type="password" id="password" name="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••">
+            </div>
+            <div class="text-sm">
+                <a href="#" class="font-medium text-blue-200 hover:text-blue-100">Forgot Password?</a>
+            </div>
+            <div>
+                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Login to your account
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                this.classList.add('shake');
+                setTimeout(() => this.classList.remove('shake'), 820);
+                return;
+            }
+            
+            // Here you would typically send the login data to a server
+            console.log('Login attempt:', { email, password });
+            alert('Login attempt successful! Check the console for details.');
+        });
+    </script>
+</body>
+</html>
