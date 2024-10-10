@@ -86,7 +86,7 @@ def create(request):
         description = request.POST.get('description')  
         MovieInfo_obj = MovieInfo(title=title,year=year,description=description)
         MovieInfo_obj.save()   """
-        frm = MovieForm(request.POST)
+        frm = MovieForm(request.POST.request.FILES)
         if frm.is_valid():
             frm.save()
 
