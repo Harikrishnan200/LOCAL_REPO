@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        'primary-hover': '#1d4ed8',
+                        'light-blue': '#dbeafe',
+                        'dark-blue': '#1e40af',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #map {
+            height: 300px;
+            width: 100%;
+            border-radius: 0.5rem;
+            z-index: 1;
+        }
+        @media (min-width: 768px) {
+            #map {
+                height: 400px;
+            }
+        }
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .content-below-header {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex">
+    <div id="navbar" class="h-screen bg-[#FEFEFF] dark:bg-gray-800 transition-all duration-300 w-64 flex flex-col fixed left-0 top-0 z-50">
+        <div class="flex items-center justify-between p-4">
+            <h2 class="text-xl font-semibold dark:text-white">UserPortal</h2>
+            <button id="toggleSidebar" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                <i class="ri-menu-line text-xl dark:text-white"></i>
+            </button>
+        </div>
+
+        <div class="flex-1 px-3 py-4 space-y-1">
+            <div class="relative">
+                <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text" placeholder="Search" class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white">
+            </div>
+
+            <div class="space-y-1">
+                <button id="overviewBtn" class="flex items-center w-full p-2 rounded-lg bg-primary text-white group">
+                    <i class="ri-dashboard-line text-xl mr-3"></i>
+                    <span>Overview</span>
+                </button>
+                
+                <button id="messagesBtn" class="flex items-center w-full p-2 rounded-lg hover:bg-light-blue dark:hover:bg-gray-700 group">
+                    <i class="ri-message-2-line text-xl mr-3 text-gray-700 group-hover:text-primary dark:text-gray-200"></i>
+                    <span class="text-gray-700 group-hover:text-primary dark:text-gray-200">Messages</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="px-3 py-4 space-y-1">
+            <a href="#" class="flex items-center p-2 rounded-lg hover:bg-light-blue dark:hover:bg-gray-700 group">
+                <i class="ri-settings-line text-xl mr-3 text-gray-700 group-hover:text-primary dark:text-gray-200"></i>
+                <span class="text-gray-700 group-hover:text-primary dark:text-gray-200">Settings</span>
+            </a>
+            <a href="#" class="flex items-center p-2 rounded-lg hover:bg-light-blue dark:hover:bg-gray-700 group">
+                <i class="ri-logout-box-line text-xl mr-3 text-gray-700 group-hover:text-primary dark:text-gray-200"></i>
+                <span class="text-gray-700 group-hover:text-primary dark:text-gray-200">Logout</span>
+            </a>
+        </div>
+
+        <div class="p-4 mt-auto border-t border-gray-200 dark:border-gray-700">
+            <div class="flex items-center">
+                <img src="https://via.placeholder.com/40" alt="User" class="w-10 h-10 rounded-full">
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-200">John Doe</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">john@example.com</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-1 ml-64 transition-all duration-300">
+        <header class="bg-[#FEFEFF] dark:bg-gray-800 shadow-sm sticky-header">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4 md:py-6">
+                    <div class="flex items-center">
+                        <button id="menuToggle" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden">
+                            <span class="sr-only">Open menu</span>
+                            <i class="ri-menu-line text-xl"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center">
+                        <button id="toggleTheme" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 mr-4">
+                            <i class="ri-sun-line text-xl dark:text-white"></i>
+                        </button>
+                        <div class="relative">
+                            <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="ri-notification-line text-xl dark:text-white"></i>
+                                <span class="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+                            </button>
+                        </div>
+                        <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <img src="https://via.placeholder.com/32" alt="Profile" class="w-8 h-8 rounded-full">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:inline-block">John Doe</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto bg-gray-100 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 content-below-header">
+            <div class="max-w-7xl mx-auto">
+                <!-- Overview Section -->
+                <div id="overviewSection">
+                    <!-- Map Section -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6 mb-6">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Location Overview</h2>
+                        <div id="map"></div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium">Pending Tasks</h3>
+                                <i class="ri-time-line text-2xl text-primary"></i>
+                            </div>
+                            <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-2">8</p>
+                            <p class="text-red-600 text-sm mt-2">↑ 2 new tasks</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium">Messages</h3>
+                                <i class="ri-message-2-line text-2xl text-primary"></i>
+                            </div>
+                            <p class="text-2xl font-semibold text-gray-900 dark:text-white mt-2">12</p>
+                            <p class="text-green-600 text-sm mt-2">3 unread</p>
+                        </div>
+                    </div>
+
+                    <!-- Location Boxes -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
+                        <!-- My Location Box -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">My Location</h3>
+                                <i class="ri-map-pin-user-fill text-2xl text-primary"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    <span class="font-medium">Location:</span> New York City, USA
+                                </p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    <span class="font-medium">Latitude:</span> 40.7128° N
+                                </p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    <span class="font-medium">Longitude:</span> 74.0060° W
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Destination Box -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Destination</h3>
+                                <i class="ri-flag-2-fill text-2xl text-primary"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    <span class="font-medium">Location:</span> Paris, France
+                                </p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    <span class="font-medium">Latitude:</span> 48.8566° N
+                                </p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    <span class="font-medium">Longitude:</span> 2.3522° E
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity Table -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                        <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h2>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                    <tr>
+                                        <th scope="col" class="px-4 sm:px-6 py-3">Type</th>
+                                        <th scope="col" class="px-4 sm:px-6 py-3">Detected</th>
+                                        <th scope="col" class="px-4 sm:px-6 py-3">Date</th>
+                                        <th scope="col" class="px-4 sm:px-6 py-3">Priority</th>
+                                        <th scope="col" class="px-4 sm:px-6 py-3">Status</th>
+                                        <th scope="col" class="px-4 sm:px-6 py-3">Location</th>
+                                        <th scope="col" class="px-4 sm:px-6 py-3">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tr class="bg-white dark:bg-gray-800">
+                                        <td class="px-4 sm:px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            <div class="flex items-center">
+                                                <i class="ri-file-upload-line text-primary mr-2"></i>
+                                                <span>Task Update</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4">System</td>
+                                        <td class="px-4 sm:px-6 py-4">2 hours ago</td>
+                                        <td class="px-4 sm:px-6 py-4">
+                                            <span class="px-2 py-1 font-semibold leading-tight text-orange-700 bg-orange-100 rounded-full dark:bg-orange-700 dark:text-orange-100">
+                                                Medium
+                                            </span>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4">
+                                            <span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
+                                                Complete
+                                            </span>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4">New York</td>
+                                        <td class="px-4 sm:px-6 py-4">
+                                            <button class="flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200">
+                                                <i class="ri-eye-line mr-1"></i> View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="bg-white dark:bg-gray-800">
+                                        <td class="px-4 sm:px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            <div class="flex items-center">
+                                                <i class="ri-message-2-line text-primary mr-2"></i>
+                                                <span>New Message</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4">User</td>
+                                        <td class="px-4 sm:px-6 py-4">1 day ago</td>
+                                        <td class="px-4 sm:px-6 py-4">
+                                            <span class="px-2 py-1 font-semibold leading-tight text-red-700 bg-red-100 rounded-full dark:bg-red-700 dark:text-red-100">
+                                                High
+                                            </span>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4">
+                                            <span class="px-2 py-1 font-semibold leading-tight text-yellow-700 bg-yellow-100 rounded-full dark:bg-yellow-700 dark:text-yellow-100">
+                                                Pending
+                                            </span>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4">Paris</td>
+                                        <td class="px-4 sm:px-6 py-4">
+                                            <button class="flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200">
+                                                <i class="ri-eye-line mr-1"></i> View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages Section -->
+                <div id="messagesSection" class="hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                        <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Messages</h2>
+                        </div>
+                        <div class="p-4 sm:p-6">
+                            <div id="messageList" class="space-y-4 h-[calc(100vh-300px)] overflow-y-auto">
+                                <!-- Messages will be dynamically inserted here -->
+                            </div>
+                            <div class="mt-4">
+                                <form id="messageForm" class="flex items-center space-x-2">
+                                    <input
+                                        type="text"
+                                        id="messageInput"
+                                        placeholder="Type your message..."
+                                        class="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white"
+                                    />
+                                    <button type="submit" class="bg-primary text-white p-2 rounded-lg hover:bg-primary-hover">
+                                        <i class="ri-send-plane-fill"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const navbar = document.getElementById('navbar');
+        const toggleSidebar = document.getElementById('toggleSidebar');
+        const menuToggle = document.getElementById('menuToggle');
+        const toggleTheme = document.getElementById('toggleTheme');
+        const html = document.documentElement;
+        const mainContent = document.querySelector('.ml-64');
+
+        toggleSidebar.addEventListener('click', () => {
+            navbar.classList.toggle('w-20');
+            navbar.classList.toggle('w-64');
+            mainContent.classList.toggle('ml-20');
+            mainContent.classList.toggle('ml-64');
+            const isCollapsed = navbar.classList.contains('w-20');
+            document.querySelectorAll('#navbar span, #navbar h2, #navbar .ml-3').forEach(el => {
+                el.style.display = isCollapsed ? 'none' : 'block';
+            });
+            document.querySelector('#navbar input').placeholder = isCollapsed ? '' : 'Search';
+        });
+
+        menuToggle.addEventListener('click', () => {
+            navbar.classList.toggle('-translate-x-full');
+        });
+
+        toggleTheme.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            toggleTheme.innerHTML = isDark ? '<i class="ri-moon-line text-xl text-white"></i>' : '<i class="ri-sun-line text-xl"></i>';
+            localStorage.theme = isDark ? 'dark' : 'light';
+        });
+
+        // Check for saved theme preference or use system preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
+
+        // Update theme icon on load
+        const isDark = html.classList.contains('dark');
+        toggleTheme.innerHTML = isDark ? '<i class="ri-moon-line text-xl text-white"></i>' : '<i class="ri-sun-line text-xl"></i>';
+
+        // Initialize Leaflet map
+        const map = L.map('map').setView([20, 0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        const locations = [
+            { coords: [40.7128, -74.0060], label: 'New York City, USA' },
+            { coords: [48.8566, 2.3522], label: 'Paris, France' },
+            { coords: [35.6762, 139.6503], label: 'Tokyo, Japan' }
+        ];
+
+        locations.forEach(location => {
+            L.marker(location.coords)
+                .addTo(map)
+                .bindPopup(`<b>${location.label}</b>`)
+                .openPopup();
+        });
+
+        // View switching
+        const overviewBtn = document.getElementById('overviewBtn');
+        const messagesBtn = document.getElementById('messagesBtn');
+        const overviewSection = document.getElementById('overviewSection');
+        const messagesSection = document.getElementById('messagesSection');
+
+        overviewBtn.addEventListener('click', () => {
+            overviewSection.classList.remove('hidden');
+            messagesSection.classList.add('hidden');
+            overviewBtn.classList.add('bg-primary', 'text-white');
+            overviewBtn.classList.remove('hover:bg-light-blue', 'dark:hover:bg-gray-700');
+            messagesBtn.classList.remove('bg-primary', 'text-white');
+            messagesBtn.classList.add('hover:bg-light-blue', 'dark:hover:bg-gray-700');
+            if (window.innerWidth < 768) {
+                navbar.classList.add('-translate-x-full');
+            }
+        });
+
+        messagesBtn.addEventListener('click', () => {
+            overviewSection.classList.add('hidden');
+            messagesSection.classList.remove('hidden');
+            messagesBtn.classList.add('bg-primary', 'text-white');
+            messagesBtn.classList.remove('hover:bg-light-blue', 'dark:hover:bg-gray-700');
+            overviewBtn.classList.remove('bg-primary', 'text-white');
+            overviewBtn.classList.add('hover:bg-light-blue', 'dark:hover:bg-gray-700');
+            if (window.innerWidth < 768) {
+                navbar.classList.add('-translate-x-full');
+            }
+        });
+
+        // Messages functionality
+        const messageList = document.getElementById('messageList');
+        const messageForm = document.getElementById('messageForm');
+        const messageInput = document.getElementById('messageInput');
+
+        const messages = [
+            { sender: 'Jane Doe', content: "Hey, just wanted to check in on the project status. How's it going?", timestamp: '2 hours ago' },
+            { sender: 'You', content: "Hi Jane, thanks for checking in. The project is progressing well. We're currently in the testing phase and should be ready for the final review next week.", timestamp: '1 hour ago' },
+        ];
+
+        function renderMessages() {
+            messageList.innerHTML = messages.map(message => `
+                <div class="flex items-start space-x-4 ${message.sender === 'You' ? 'justify-end' : ''}">
+                    ${message.sender !== 'You' ? `<img src="https://via.placeholder.com/40" alt="User Avatar" class="w-10 h-10 rounded-full">` : ''}
+                    <div class="${message.sender === 'You' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700'} rounded-lg p-3 max-w-[70%]">
+                        <p class="text-sm font-medium">${message.sender}</p>
+                        <p class="text-sm">${message.content}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${message.timestamp}</p>
+                    </div>
+                    ${message.sender === 'You' ? `<img src="https://via.placeholder.com/40" alt="Your Avatar" class="w-10 h-10 rounded-full">` : ''}
+                </div>
+            `).join('');
+        }
+
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (messageInput.value.trim()) {
+                messages.push({
+                    sender: 'You',
+                    content: messageInput.value,
+                    timestamp: 'Just now'
+                });
+                messageInput.value = '';
+                renderMessages();
+                messageList.scrollTop = messageList.scrollHeight;
+            }
+        });
+
+        renderMessages();
+    </script>
+</body>
+</html>
+
