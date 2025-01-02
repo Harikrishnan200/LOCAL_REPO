@@ -182,19 +182,19 @@
                         </div>
 
                         <!-- Destination Box -->
-                        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm">
+                        <div id="destinationCard" class="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-sm">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Destination</h3>
                                 <i class="ri-flag-2-fill text-2xl text-primary"></i>
                             </div>
                             <div class="space-y-2">
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                <p id="destinationLocation" class="text-sm text-gray-600 dark:text-gray-400">
                                     <span class="font-medium">Location:</span> Paris, France
                                 </p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                <p id="destinationLatitude" class="text-sm text-gray-600 dark:text-gray-400">
                                     <span class="font-medium">Latitude:</span> 48.8566° N
                                 </p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                <p id="destinationLongitude" class="text-sm text-gray-600 dark:text-gray-400">
                                     <span class="font-medium">Longitude:</span> 2.3522° E
                                 </p>
                             </div>
@@ -241,7 +241,33 @@
                                         </td>
                                         <td class="px-4 sm:px-6 py-4">New York</td>
                                         <td class="px-4 sm:px-6 py-4">
-                                            <button class="flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200">
+                                            <button class="flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200" data-coords="[40.7128, -74.0060]" data-label="New York City, USA">
+                                                <i class="ri-eye-line mr-1"></i> View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="bg-white dark:bg-gray-800">
+                                        <td class="px-4 sm:px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            <div class="flex items-center">
+                                                <i class="ri-file-upload-line text-primary mr-2"></i>
+                                                <span>Location Update</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4">System</td>
+                                        <td class="px-4 sm:px-6 py-4">1 hour ago</td>
+                                        <td class="px-4 sm:px-6 py-4">
+                                            <span class="px-2 py-1 font-semibold leading-tight text-orange-700 bg-orange-100 rounded-full dark:bg-orange-700 dark:text-orange-100">
+                                                Medium
+                                            </span>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4">
+                                            <span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
+                                                Complete
+                                            </span>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4">Manakala</td>
+                                        <td class="px-4 sm:px-6 py-4">
+                                            <button class="flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200" data-coords="[9.13265715567626, 76.71883411284408]" data-label="Manakala, India">
                                                 <i class="ri-eye-line mr-1"></i> View
                                             </button>
                                         </td>
@@ -267,7 +293,7 @@
                                         </td>
                                         <td class="px-4 sm:px-6 py-4">Paris</td>
                                         <td class="px-4 sm:px-6 py-4">
-                                            <button class="flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200">
+                                            <button class="flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200" data-coords="[48.8566, 2.3522]" data-label="Paris, France">
                                                 <i class="ri-eye-line mr-1"></i> View
                                             </button>
                                         </td>
@@ -439,7 +465,26 @@
         });
 
         renderMessages();
+
+        // Function to update destination card and plot on map
+        function updateDestination(coords, label) {
+            document.getElementById('destinationLocation').innerHTML = `<span class="font-medium">Location:</span> ${label}`;
+            document.getElementById('destinationLatitude').innerHTML = `<span class="font-medium">Latitude:</span> ${coords[0]}° N`;
+            document.getElementById('destinationLongitude').innerHTML = `<span class="font-medium">Longitude:</span> ${coords[1]}° E`;
+
+            // Update map view and marker with higher zoom level
+            map.setView(coords, 18); // Increase zoom level to 15
+            L.marker(coords).addTo(map).bindPopup(`<b>${label}</b>`).openPopup();
+        }
+
+        // Add event listeners to "View" buttons
+        document.querySelectorAll('button[data-coords]').forEach(button => {
+            button.addEventListener('click', () => {
+                const coords = JSON.parse(button.getAttribute('data-coords'));
+                const label = button.getAttribute('data-label');
+                updateDestination(coords, label);
+            });
+        });
     </script>
 </body>
 </html>
-
